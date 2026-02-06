@@ -1,4 +1,5 @@
 import os
+import io
 import random
 import asyncio
 import sqlite3
@@ -10,6 +11,41 @@ from telegram.ext import ApplicationBuilder, CommandHandler, CallbackQueryHandle
 # Load token
 load_dotenv()
 TOKEN = os.getenv("BOT_TOKEN")
+OWNER_ID = int(os.getenv("OWNER_ID", 0)) 
+
+# --- UPDATE FUNGSI ADMIN ---
+async def handle_buttons(update: Update, context: ContextTypes.DEFAULT_TYPE):
+    query = update.callback_query
+    chat_id = query.message.chat_id
+    user_id = query.from_user.id
+    
+    # ... (kode gacha & timer yang lama tetep ada) ...
+
+    # FITUR BARU: SEND DB (Hanya untuk Owner)
+    if query.data == "send_db":
+        if user_id != OWNER_ID:
+            return await query.answer("Lu bukan bos gue! Gak boleh pegang database.", show_alert=True)
+        
+        await query.answer("Sabar, lagi packing database...")
+        try:
+            with open('chaos_bot.db', 'rb') as db_file:
+                await context.bot.send_document(
+                    chat_id=user_id, # Dikirim ke private chat owner
+                    document=db_file,
+                    filename=f"backup_chaos_{int(time.time())}.db",
+                    caption="🚀 Nih DB terbaru. Simpen baik-baik buat restore nanti di Railway."
+                )
+            await query.message.reply_text("✅ Database udah gue kirim ke PC lu (Private Chat).")
+        except Exception as e:
+            await query.message.reply_text(f"❌ Gagal kirim DB: {e}")
+
+# --- UPDATE UI ADMIN (Tambahin tombol Send DB) ---
+def get_admin_setup_markup():
+    keyboard = [
+        [InlineKeyboardButton("📤 Send DB (Backup)", callback_query_data="send_db")],
+        [InlineKeyboardButton("🔙 Kembali", callback_query_data="back_to_main")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
 
 # --- DATABASE SETUP (SQLite) ---
 def init_db():
