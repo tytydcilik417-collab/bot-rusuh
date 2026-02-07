@@ -67,14 +67,26 @@ BACOTAN_2_ORG = [
 # --- UI MARKUP ---
 def get_main_markup(is_mute_active=False):
     gacha_text = "🔒 Lagi Ada Yang Kena Mute" if is_mute_active else "🎲 Gacha Mute (Zonk Anjing)"
+    # Di sini ganti jadi callback_data
     gacha_callback = "null" if is_mute_active else "gacha_mute"
     
     keyboard = [
-        [InlineKeyboardButton(gacha_text, callback_query_data=gacha_callback)],
-        [InlineKeyboardButton("😈 TOD Bar-bar", callback_query_data="tod_manual")],
-        [InlineKeyboardButton("⚙️ Set Timer / Admin", callback_query_data="set_timer_menu")]
+        [InlineKeyboardButton(gacha_text, callback_data=gacha_callback)],
+        [InlineKeyboardButton("😈 TOD Bar-bar", callback_data="tod_manual")],
+        [InlineKeyboardButton("⚙️ Set Timer / Admin", callback_data="set_timer_menu")]
     ]
     return InlineKeyboardMarkup(keyboard)
+
+# Pastikan di bagian menu Admin juga diganti:
+def get_admin_setup_markup(): # Jika kamu pakai fungsi ini
+    keys = [
+        [InlineKeyboardButton("5 Menit", callback_data="t_5"), 
+         InlineKeyboardButton("15 Menit", callback_data="t_15")],
+        [InlineKeyboardButton("OFF", callback_data="t_0")],
+        [InlineKeyboardButton("📤 Backup DB (Owner)", callback_data="send_db")],
+        [InlineKeyboardButton("🔙 Kembali", callback_data="back_to_main")]
+    ]
+    return InlineKeyboardMarkup(keys)
 
 # --- HANDLERS ---
 async def track_members(update: Update, context: ContextTypes.DEFAULT_TYPE):
